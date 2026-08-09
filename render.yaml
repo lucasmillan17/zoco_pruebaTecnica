@@ -1,0 +1,37 @@
+# Blueprint opcional de Render. Los valores de las variables con "sync: false"
+# se completan en el dashboard (pestaña Environment), nunca en el repo.
+#
+# Para usarlo: conectá este repo a Render y creá el Blueprint, o creá los
+# servicios manualmente con la misma configuración.
+
+services:
+  # ---------- API (.NET 10, Docker) ----------
+  - type: web
+    name: cms-api
+    runtime: docker
+    region: oregon
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/comercios
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ConnectionStrings__Default
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: Cors__AllowedOrigins__0
+        sync: false
+
+  # ---------- Frontend (Vite, estático) ----------
+  - type: web
+    name: cms-front
+    runtime: static
+    region: oregon
+    rootDir: Frontend
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      # URL de la API para buildear el bundle (ej: https://cms-api.onrender.com)
+      - key: VITE_API_URL
+        sync: false

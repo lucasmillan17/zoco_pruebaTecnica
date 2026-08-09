@@ -1,0 +1,85 @@
+@CMS.Api_HostAddress = http://localhost:5000
+
+### Listar tipos de interacción (seed con 13 tipos)
+GET {{CMS.Api_HostAddress}}/api/tipos-interaccion?pageSize=50
+Accept: application/json
+
+### Crear tipo de interacción
+POST {{CMS.Api_HostAddress}}/api/tipos-interaccion
+Content-Type: application/json
+
+{
+  "codigo": "prueba_api",
+  "nombre": "Prueba API",
+  "descripcion": "Tipo creado para probar el endpoint."
+}
+
+### Crear comercio (CUIT válido)
+POST {{CMS.Api_HostAddress}}/api/comercios
+Content-Type: application/json
+
+{
+  "razonSocial": "Café La Esquina",
+  "cuit": "20123456786",
+  "nombreDelContacto": "Laura Gómez",
+  "telefono": "+54 11 5555-1234",
+  "direccion": "Av. Corrientes 1200, CABA",
+  "email": "contacto@cafelaesquina.com",
+  "rubro": "Gastronomía",
+  "notas": "Potencial cliente para POS con menú digital."
+}
+
+### Buscar comercios (filtros + paginación)
+GET {{CMS.Api_HostAddress}}/api/comercios?busqueda=caf%C3%A9&rubro=Gastronom%C3%ADa&pageSize=10
+Accept: application/json
+
+### Buscar comercios ordenados por último contacto (desc = más reciente primero)
+GET {{CMS.Api_HostAddress}}/api/comercios?ordenarPor=ultimocontacto&orden=desc
+Accept: application/json
+
+### Ordenar por rubro / orden inválido → 400
+GET {{CMS.Api_HostAddress}}/api/comercios?ordenarPor=rubro&orden=asc
+Accept: application/json
+
+### Orden inválido (debe responder 400)
+GET {{CMS.Api_HostAddress}}/api/comercios?ordenarPor=noexiste
+Accept: application/json
+
+### Actualizar comercio (cambiar estado a Contactado)
+PUT {{CMS.Api_HostAddress}}/api/comercios/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "razonSocial": "Café La Esquina",
+  "estado": "Contactado"
+}
+
+### Crear interacción (llamada)
+POST {{CMS.Api_HostAddress}}/api/interacciones
+Content-Type: application/json
+
+{
+  "comercioId": "00000000-0000-0000-0000-000000000000",
+  "tipoInteraccionId": "11111111-1111-1111-1111-111111111101",
+  "notas": "Primera llamada, interesado en POS."
+}
+
+### Listar interacciones de un comercio
+GET {{CMS.Api_HostAddress}}/api/interacciones?comercioId=00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### Analizar oportunidad (Gemini o fallback heurístico)
+POST {{CMS.Api_HostAddress}}/api/comercios/00000000-0000-0000-0000-000000000000/oportunidad
+Accept: application/json
+
+### Eliminar comercio (soft delete)
+DELETE {{CMS.Api_HostAddress}}/api/comercios/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+### Reactivar comercio rechazado
+POST {{CMS.Api_HostAddress}}/api/comercios/00000000-0000-0000-0000-000000000000/reactivar
+Accept: application/json
+
+### Error: comercio inexistente (404)
+GET {{CMS.Api_HostAddress}}/api/comercios/99999999-9999-9999-9999-999999999999
+Accept: application/json

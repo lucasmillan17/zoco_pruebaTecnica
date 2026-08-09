@@ -1,0 +1,27 @@
+# Build artifacts
+bin/
+obj/
+*.user
+
+# IDE
+.vscode/
+.idea/
+.vs/
+
+# Node / frontend
+node_modules/
+Frontend/dist/
+Frontend/.vite/
+
+# Secrets / config local (nunca commitear)
+appsettings.Development.json
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+*.docx
+
+# docs
+docs/
