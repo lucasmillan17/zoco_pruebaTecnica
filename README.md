@@ -15,7 +15,7 @@ con IA y auditoría de cambios.
 ## Deploy
 
 - **API (producción):** https://cms-api.onrender.com (Render web service, PostgreSQL en Render)
-- **Frontend:** Render static site (el build apunta a la API de producción vía `VITE_API_URL`)
+- **Frontend (producción):** https://cms-front-myoe.onrender.com/ (Render static site, apunta a la API de producción vía `VITE_API_URL`)
 
 ## Levantar en local
 
