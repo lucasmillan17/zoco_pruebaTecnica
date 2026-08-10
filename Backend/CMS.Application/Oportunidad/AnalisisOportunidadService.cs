@@ -99,6 +99,23 @@ public class AnalisisOportunidadService : IAnalisisOportunidadService
             Interacciones registradas:
             {{interaccionesTexto}}
 
+            CÓMO CALCULAR EL NIVEL DE INTERÉS (sé REALISTA y CONSERVADOR, seguí estas reglas):
+            1. Punto de partida según estado: Contactado +1, Interesado +3, Documentacion +3, Aprobado +4.
+               Rechazado => el nivel SIEMPRE es "bajo".
+            2. Interacciones: demo, reunión o firma de contrato suman +3. Quejas restan -1.
+            3. Señales de interés en las notas (interesado, presupuesto, pos, qr, conciliación, transferencia,
+               efectivo, quiero, necesito, "cuando lo podemos", "mandame"): +1 por cada una.
+            4. Recencia: 1+ interacciones en el último mes suma +1; 3+ suman +2.
+            5. Nivel final: score >= 5 => "alto", score >= 2 => "medio", score < 2 => "bajo".
+
+            REGLAS ESTRICTAS ANTI-OPTIMISMO:
+            - Un comercio NUEVO sin interacciones y sin notas con señales de interés reales => "bajo", nunca "alto".
+            - "alto" SOLO cuando hay evidencia fuerte: estado Interesado o superior Y/O demos, reuniones o firmas repetidas.
+            - Sin evidencia suficiente, elegí "bajo" o "medio", nunca "alto".
+            - Una nota genérica de prospección como "comercio interesante para formar parte de zoco" NO es señal de interés comercial.
+
+            El resto de los campos (resumen, proximoPaso, preguntas, datosFaltantes) los redactás libremente.
+
             Respondé con este esquema JSON exacto:
             {
               "resumen": "resumen ejecutivo del comercio (2-3 oraciones)",
