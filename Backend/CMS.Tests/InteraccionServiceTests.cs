@@ -143,7 +143,7 @@ public class InteraccionServiceTests
     private static (InteraccionService Service, InMemoryRepository Repo) CrearService()
     {
         var repo = new InMemoryRepository();
-        return (new InteraccionService(repo), repo);
+        return (new InteraccionService(repo, new FakeCurrentUser()), repo);
     }
 
     private static Comercio CrearComercioEnRepo(InMemoryRepository repo)

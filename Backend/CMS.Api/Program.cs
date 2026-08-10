@@ -1,7 +1,9 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using CMS.Api;
+using CMS.Api.Auth;
 using CMS.Application.Auth;
+using CMS.Application.Auditorias;
 using CMS.Application.Comercios;
 using CMS.Application.DBInterfaces;
 using CMS.Application.Interacciones;
@@ -69,8 +71,13 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITipoInteraccionService, TipoInteraccionService>();
 builder.Services.AddScoped<IComercioService, ComercioService>();
 builder.Services.AddScoped<IInteraccionService, InteraccionService>();
+builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddScoped<AnalizadorHeuristico>();
 builder.Services.AddScoped<IAnalisisOportunidadService, AnalisisOportunidadService>();
+
+// Usuario autenticado para auditoría (CreatedBy/UpdatedBy)
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
 // Proveedor de IA (Gemini)
 builder.Services.AddHttpClient<IGeminiClient, GeminiClient>(client =>

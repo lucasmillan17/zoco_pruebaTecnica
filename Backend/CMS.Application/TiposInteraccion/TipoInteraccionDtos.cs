@@ -25,4 +25,11 @@ public record ActualizarTipoInteraccionDto(
     [MaxLength(300)]
     string? Descripcion);
 
-public record TipoInteraccionDto(Guid Id, string Codigo, string Nombre, string? Descripcion, bool Activo);
+public record TipoInteraccionDto(
+    Guid Id,
+    string Codigo,
+    string Nombre,
+    string? Descripcion,
+    bool Activo,
+    string? CreatedBy,
+    string? UpdatedBy);

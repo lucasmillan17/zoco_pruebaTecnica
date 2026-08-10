@@ -47,7 +47,9 @@ namespace CMS.Application.Auth
         bool Activo,
         bool DebeCambiarPassword,
         string? Email,
-        string? Telefono);
+        string? Telefono,
+        string? CreatedBy,
+        string? UpdatedBy);
 
     public record LoginResponseDto(string Token, UsuarioDto Usuario);
 }

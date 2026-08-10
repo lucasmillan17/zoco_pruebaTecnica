@@ -80,6 +80,19 @@ public class ComercioServiceTests
     }
 
     [Fact]
+    public async Task Crear_RegistraCreadorEnAuditoria()
+    {
+        var (service, _) = CrearService();
+
+        var creado = await service.CreateAsync(Dto("Cafe", CuitValido));
+        var actualizado = await service.UpdateAsync(creado.Id, UpdateDto("Cafe Renovado"));
+
+        Assert.Equal("admin", creado.CreatedBy);
+        Assert.Null(creado.UpdatedBy);
+        Assert.Equal("admin", actualizado.UpdatedBy);
+    }
+
+    [Fact]
     public async Task Crear_ConCuitDuplicado_LanzaConflict()
     {
         var (service, _) = CrearService();
@@ -317,6 +330,6 @@ public class ComercioServiceTests
     private static (ComercioService Service, InMemoryRepository Repo) CrearService()
     {
         var repo = new InMemoryRepository();
-        return (new ComercioService(repo), repo);
+        return (new ComercioService(repo, new FakeCurrentUser()), repo);
     }
 }

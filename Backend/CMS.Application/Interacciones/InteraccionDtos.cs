@@ -27,4 +27,6 @@ public record InteraccionDto(
     string? TipoNombre,
     DateTime? FechaInteraccion,
     string? Notas,
-    DateTime CreatedAt);
+    DateTime CreatedAt,
+    string? CreatedBy,
+    string? UpdatedBy);

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using CMS.Application.Auth;
 using CMS.Application.DBInterfaces;
 using CMS.Application.DBInterfaces.Wrappers;
 using CMS.Application.Exceptions;
@@ -20,10 +21,12 @@ public class ComercioService : IComercioService
         };
 
     private readonly IRepository _repo;
+    private readonly ICurrentUser _currentUser;
 
-    public ComercioService(IRepository repo)
+    public ComercioService(IRepository repo, ICurrentUser currentUser)
     {
         _repo = repo;
+        _currentUser = currentUser;
     }
 
     public async Task<PagedResult<ComercioDto>> GetAllAsync(BuscarComerciosQuery query)
@@ -95,7 +98,8 @@ public class ComercioService : IComercioService
             FechaDeCreacionEmpresa = DateTime.UtcNow,
             Activo = true,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            CreatedBy = _currentUser.NombreUsuario
         };
 
         await _repo.Add(comercio);
@@ -137,6 +141,7 @@ public class ComercioService : IComercioService
         if (dto.Rubro is not null) comercio.Rubro = dto.Rubro.Trim();
         if (dto.Notas is not null) comercio.Notas = dto.Notas.Trim();
         comercio.UpdatedAt = DateTime.UtcNow;
+        comercio.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(comercio);
         return Mapear(comercio);
@@ -152,6 +157,7 @@ public class ComercioService : IComercioService
 
         comercio.Activo = false;
         comercio.UpdatedAt = DateTime.UtcNow;
+        comercio.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(comercio);
     }
@@ -172,6 +178,7 @@ public class ComercioService : IComercioService
         comercio.Estado = EstadoComercio.Nuevo;
         comercio.Activo = true;
         comercio.UpdatedAt = DateTime.UtcNow;
+        comercio.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(comercio);
         return Mapear(comercio);
@@ -246,6 +253,8 @@ public class ComercioService : IComercioService
             c.Estado,
             c.Activo,
             c.CreatedAt,
-            c.UpdatedAt);
+            c.UpdatedAt,
+            c.CreatedBy,
+            c.UpdatedBy);
     }
 }

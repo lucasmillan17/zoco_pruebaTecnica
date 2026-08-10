@@ -12,11 +12,13 @@ namespace CMS.Application.Auth
     {
         private readonly IRepository _repo;
         private readonly JwtOptions _jwt;
+        private readonly ICurrentUser _currentUser;
 
-        public AuthService(IRepository repo, JwtOptions jwt)
+        public AuthService(IRepository repo, JwtOptions jwt, ICurrentUser currentUser)
         {
             _repo = repo;
             _jwt = jwt;
+            _currentUser = currentUser;
         }
 
         public async Task<LoginResponseDto> LoginAsync(LoginDto dto)
@@ -50,6 +52,7 @@ namespace CMS.Application.Auth
             usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.PasswordNueva);
             usuario.DebeCambiarPassword = false;
             usuario.UpdatedAt = DateTime.UtcNow;
+            usuario.UpdatedBy = _currentUser.NombreUsuario;
 
             await _repo.Update(usuario);
             return Mapear(usuario);
@@ -75,7 +78,8 @@ namespace CMS.Application.Auth
                 Email = dto.Email?.Trim(),
                 Telefono = dto.Telefono?.Trim(),
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
+                UpdatedAt = DateTime.UtcNow,
+                CreatedBy = _currentUser.NombreUsuario
             };
 
             await _repo.Add(usuario);
@@ -110,6 +114,7 @@ namespace CMS.Application.Auth
 
             objetivo.Activo = false;
             objetivo.UpdatedAt = DateTime.UtcNow;
+            objetivo.UpdatedBy = _currentUser.NombreUsuario;
 
             await _repo.Update(objetivo);
             return Mapear(objetivo);
@@ -159,6 +164,8 @@ namespace CMS.Application.Auth
                 usuario.Activo,
                 usuario.DebeCambiarPassword,
                 usuario.Email,
-                usuario.Telefono);
+                usuario.Telefono,
+                usuario.CreatedBy,
+                usuario.UpdatedBy);
     }
 }

@@ -132,6 +132,6 @@ public class TipoInteraccionServiceTests
     private static (TipoInteraccionService Service, InMemoryRepository Repo) CrearService()
     {
         var repo = new InMemoryRepository();
-        return (new TipoInteraccionService(repo), repo);
+        return (new TipoInteraccionService(repo, new FakeCurrentUser()), repo);
     }
 }

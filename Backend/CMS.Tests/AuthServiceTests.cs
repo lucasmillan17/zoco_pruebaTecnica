@@ -16,7 +16,7 @@ public class AuthServiceTests
     private static (AuthService service, InMemoryRepository repo) CrearService()
     {
         var repo = new InMemoryRepository();
-        var service = new AuthService(repo, Jwt);
+        var service = new AuthService(repo, Jwt, new FakeCurrentUser());
         return (service, repo);
     }
 
@@ -106,6 +106,7 @@ public class AuthServiceTests
         var resultado = await service.CrearUsuarioAsync(new CrearUsuarioDto("  AdminDos  ", "Admin Dos", "Admin123!", RolUsuario.Administrador));
 
         Assert.Equal("admindos", resultado.NombreUsuario);
+        Assert.Equal("admin", resultado.CreatedBy);
         var enRepo = await repo.First<Usuario>(u => u.NombreUsuario == "admindos");
         Assert.NotNull(enRepo);
         Assert.NotEqual("Admin123!", enRepo!.PasswordHash);

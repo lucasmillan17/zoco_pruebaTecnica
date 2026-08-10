@@ -1,3 +1,4 @@
+using CMS.Application.Auth;
 using CMS.Application.DBInterfaces;
 using CMS.Application.DBInterfaces.Wrappers;
 using CMS.Application.Exceptions;
@@ -8,10 +9,12 @@ namespace CMS.Application.Interacciones;
 public class InteraccionService : IInteraccionService
 {
     private readonly IRepository _repo;
+    private readonly ICurrentUser _currentUser;
 
-    public InteraccionService(IRepository repo)
+    public InteraccionService(IRepository repo, ICurrentUser currentUser)
     {
         _repo = repo;
+        _currentUser = currentUser;
     }
 
     public async Task<PagedResult<InteraccionDto>> GetByComercioAsync(
@@ -68,7 +71,8 @@ public class InteraccionService : IInteraccionService
                 : DateTime.UtcNow,
             Notas = dto.Notas?.Trim(),
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            CreatedBy = _currentUser.NombreUsuario
         };
 
         await _repo.Add(interaccion);
@@ -96,6 +100,7 @@ public class InteraccionService : IInteraccionService
 
         if (dto.Notas is not null) interaccion.Notas = dto.Notas.Trim();
         interaccion.UpdatedAt = DateTime.UtcNow;
+        interaccion.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(interaccion);
 
@@ -131,6 +136,8 @@ public class InteraccionService : IInteraccionService
             i.TipoInteraccion?.Nombre,
             i.FechaInteraccion,
             i.Notas,
-            i.CreatedAt);
+            i.CreatedAt,
+            i.CreatedBy,
+            i.UpdatedBy);
     }
 }

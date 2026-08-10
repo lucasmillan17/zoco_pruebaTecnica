@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
+using CMS.Application.Auth;
 using CMS.Application.DBInterfaces;
 using CMS.Application.DBInterfaces.Wrappers;
 using CMS.Application.Exceptions;
@@ -12,10 +13,12 @@ public partial class TipoInteraccionService : ITipoInteraccionService
     private static readonly Regex CodigoValido = CodigoRegex();
 
     private readonly IRepository _repo;
+    private readonly ICurrentUser _currentUser;
 
-    public TipoInteraccionService(IRepository repo)
+    public TipoInteraccionService(IRepository repo, ICurrentUser currentUser)
     {
         _repo = repo;
+        _currentUser = currentUser;
     }
 
     public async Task<PagedResult<TipoInteraccionDto>> GetAllAsync(
@@ -63,7 +66,8 @@ public partial class TipoInteraccionService : ITipoInteraccionService
             Descripcion = dto.Descripcion?.Trim(),
             Activo = true,
             CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            UpdatedAt = DateTime.UtcNow,
+            CreatedBy = _currentUser.NombreUsuario
         };
 
         await _repo.Add(entidad);
@@ -78,6 +82,7 @@ public partial class TipoInteraccionService : ITipoInteraccionService
         tipo.Nombre = dto.Nombre.Trim();
         if (dto.Descripcion is not null) tipo.Descripcion = dto.Descripcion.Trim();
         tipo.UpdatedAt = DateTime.UtcNow;
+        tipo.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(tipo);
         return Mapear(tipo);
@@ -93,6 +98,7 @@ public partial class TipoInteraccionService : ITipoInteraccionService
 
         tipo.Activo = false;
         tipo.UpdatedAt = DateTime.UtcNow;
+        tipo.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(tipo);
     }
@@ -107,6 +113,7 @@ public partial class TipoInteraccionService : ITipoInteraccionService
 
         tipo.Activo = true;
         tipo.UpdatedAt = DateTime.UtcNow;
+        tipo.UpdatedBy = _currentUser.NombreUsuario;
 
         await _repo.Update(tipo);
         return Mapear(tipo);
@@ -124,7 +131,7 @@ public partial class TipoInteraccionService : ITipoInteraccionService
 
     private static TipoInteraccionDto Mapear(TipoInteraccion t)
     {
-        return new TipoInteraccionDto(t.Id, t.Codigo, t.Nombre, t.Descripcion, t.Activo);
+        return new TipoInteraccionDto(t.Id, t.Codigo, t.Nombre, t.Descripcion, t.Activo, t.CreatedBy, t.UpdatedBy);
     }
 
     [GeneratedRegex(@"^[a-z][a-z0-9_]*$", RegexOptions.Compiled)]

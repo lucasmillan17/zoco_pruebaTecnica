@@ -88,7 +88,9 @@ public record ComercioDto(
     EstadoComercio Estado,
     bool Activo,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    string? CreatedBy,
+    string? UpdatedBy);
 
 public record BuscarComerciosQuery(
     string? Busqueda = null,
