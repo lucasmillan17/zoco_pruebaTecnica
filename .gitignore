@@ -23,5 +23,6 @@ appsettings.Development.json
 Thumbs.db
 *.docx
 
-# docs
-docs/
+# docs (solo binarios; los .md sí se versionan)
+docs/*
+!docs/**/*.md
