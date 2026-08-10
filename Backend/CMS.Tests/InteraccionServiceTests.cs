@@ -57,6 +57,49 @@ public class InteraccionServiceTests
     }
 
     [Fact]
+    public async Task Crear_ConFechaUnspecified_GuardaComoUtc()
+    {
+        var (service, repo) = CrearService();
+        var comercio = CrearComercioEnRepo(repo);
+        var tipo = await repo.Add(new TipoInteraccion
+        {
+            Nombre = "Llamada",
+            Codigo = "llamada",
+            Activo = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+
+        var fecha = new DateTime(2026, 8, 9, 14, 30, 0, DateTimeKind.Unspecified);
+        var resultado = await service.CreateAsync(new CrearInteraccionDto(comercio.Id, tipo.Id, fecha, null));
+
+        Assert.Equal(DateTimeKind.Utc, resultado.FechaInteraccion!.Value.Kind);
+        Assert.Equal(fecha.Ticks, resultado.FechaInteraccion.Value.Ticks);
+    }
+
+    [Fact]
+    public async Task Update_ConFechaUnspecified_GuardaComoUtc()
+    {
+        var (service, repo) = CrearService();
+        var comercio = CrearComercioEnRepo(repo);
+        var tipo = await repo.Add(new TipoInteraccion
+        {
+            Nombre = "Llamada",
+            Codigo = "llamada",
+            Activo = true,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        var creada = await service.CreateAsync(new CrearInteraccionDto(comercio.Id, tipo.Id, null, null));
+
+        var fecha = new DateTime(2026, 8, 10, 9, 0, 0, DateTimeKind.Unspecified);
+        var resultado = await service.UpdateAsync(creada.Id, new ActualizarInteraccionDto(null, fecha, null));
+
+        Assert.Equal(DateTimeKind.Utc, resultado.FechaInteraccion!.Value.Kind);
+        Assert.Equal(fecha.Ticks, resultado.FechaInteraccion.Value.Ticks);
+    }
+
+    [Fact]
     public async Task Update_NoBorraNotasSiNoSeEnvia()
     {
         var (service, repo) = CrearService();

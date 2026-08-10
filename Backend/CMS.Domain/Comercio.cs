@@ -15,6 +15,16 @@ namespace CMS.Domain
         Rechazado
     }
 
+    /// <summary>
+    /// Filtro de visibilidad por estado Activo. Default: solo activos.
+    /// </summary>
+    public enum EstadoActivo
+    {
+        Activos,
+        Inactivos,
+        Todos
+    }
+
     public class Comercio : EntityBase
     {
         public Comercio()

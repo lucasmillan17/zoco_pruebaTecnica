@@ -21,6 +21,53 @@ public class ComercioServiceTests
     }
 
     [Fact]
+    public async Task ValidarCuit_CuitInvalido_DevuelveEsValidoFalse()
+    {
+        var (service, _) = CrearService();
+
+        var resultado = await service.ValidarCuitAsync("20123456785");
+
+        Assert.False(resultado.EsValido);
+        Assert.False(resultado.Existe);
+    }
+
+    [Fact]
+    public async Task ValidarCuit_ValidoNoExistente_DevuelveExisteFalse()
+    {
+        var (service, _) = CrearService();
+
+        var resultado = await service.ValidarCuitAsync(CuitValido);
+
+        Assert.True(resultado.EsValido);
+        Assert.False(resultado.Existe);
+    }
+
+    [Fact]
+    public async Task ValidarCuit_ValidoActivo_DevuelveExisteTrue()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(Dto("Cafe", CuitValido));
+
+        var resultado = await service.ValidarCuitAsync(CuitValido);
+
+        Assert.True(resultado.EsValido);
+        Assert.True(resultado.Existe);
+    }
+
+    [Fact]
+    public async Task ValidarCuit_ValidoPeroSoftDeleteado_DevuelveExisteFalse()
+    {
+        var (service, _) = CrearService();
+        var creado = await service.CreateAsync(Dto("Cafe", CuitValido));
+        await service.DeleteAsync(creado.Id);
+
+        var resultado = await service.ValidarCuitAsync(CuitValido);
+
+        Assert.True(resultado.EsValido);
+        Assert.False(resultado.Existe);
+    }
+
+    [Fact]
     public async Task Crear_ConCuitValido_CreaConEstadoNuevo()
     {
         var (service, _) = CrearService();
@@ -113,6 +160,74 @@ public class ComercioServiceTests
         var creado = await service.CreateAsync(Dto("Cafe", CuitValido));
 
         await Assert.ThrowsAsync<ConflictException>(() => service.ReactivarAsync(creado.Id));
+    }
+
+    [Fact]
+    public async Task Reactivar_SoftDeleteadoEnOtroEstado_Recupera()
+    {
+        var (service, _) = CrearService();
+        var creado = await service.CreateAsync(Dto("Cafe", CuitValido));
+        await service.DeleteAsync(creado.Id);
+
+        var resultado = await service.ReactivarAsync(creado.Id);
+
+        Assert.True(resultado.Activo);
+        Assert.Equal(EstadoComercio.Nuevo, resultado.Estado);
+    }
+
+    [Fact]
+    public async Task Crear_ConCuitDeComercioInactivo_NoLanzaConflict()
+    {
+        var (service, _) = CrearService();
+        var creado = await service.CreateAsync(Dto("Cafe Uno", CuitValido));
+        await service.DeleteAsync(creado.Id);
+
+        var resultado = await service.CreateAsync(Dto("Cafe Dos", CuitValido));
+
+        Assert.Equal(CuitValido, resultado.Cuit);
+    }
+
+    [Fact]
+    public async Task GetAll_ActivosPorDefecto_NoIncluyeInactivos()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(Dto("Cafe Activo", CuitValido));
+        var inactivo = await service.CreateAsync(Dto("Cafe Inactivo", "27123456780"));
+        await service.DeleteAsync(inactivo.Id);
+
+        var resultado = await service.GetAllAsync(new BuscarComerciosQuery());
+
+        var unico = Assert.Single(resultado.Items);
+        Assert.Equal("Cafe Activo", unico.RazonSocial);
+    }
+
+    [Fact]
+    public async Task GetAll_Inactivos_SoloDevuelveDesactivados()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(Dto("Cafe Activo", CuitValido));
+        var inactivo = await service.CreateAsync(Dto("Cafe Inactivo", "27123456780"));
+        await service.DeleteAsync(inactivo.Id);
+
+        var resultado = await service.GetAllAsync(new BuscarComerciosQuery(EstadoActivo: EstadoActivo.Inactivos));
+
+        var unico = Assert.Single(resultado.Items);
+        Assert.Equal("Cafe Inactivo", unico.RazonSocial);
+        Assert.False(unico.Activo);
+    }
+
+    [Fact]
+    public async Task GetAll_Todos_DevuelveActivosEInactivos()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(Dto("Cafe Activo", CuitValido));
+        var inactivo = await service.CreateAsync(Dto("Cafe Inactivo", "27123456780"));
+        await service.DeleteAsync(inactivo.Id);
+
+        var resultado = await service.GetAllAsync(new BuscarComerciosQuery(EstadoActivo: EstadoActivo.Todos));
+
+        Assert.Equal(2, resultado.Items.Count);
+        Assert.Contains(resultado.Items, c => !c.Activo);
     }
 
     [Fact]

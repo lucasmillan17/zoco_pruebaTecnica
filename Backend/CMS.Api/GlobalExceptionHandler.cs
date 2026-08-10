@@ -18,6 +18,7 @@ public class GlobalExceptionHandler : IExceptionHandler
         var (status, titulo) = exception switch
         {
             NotFoundException => (StatusCodes.Status404NotFound, "No encontrado"),
+            UnauthorizedException => (StatusCodes.Status401Unauthorized, "No autorizado"),
             ConflictException => (StatusCodes.Status409Conflict, "Conflicto"),
             ExternalServiceException => (StatusCodes.Status502BadGateway, "Servicio externo no disponible"),
             _ => (StatusCodes.Status500InternalServerError, "Error interno del servidor")

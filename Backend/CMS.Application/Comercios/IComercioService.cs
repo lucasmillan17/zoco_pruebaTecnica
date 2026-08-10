@@ -10,4 +10,5 @@ public interface IComercioService
     Task<ComercioDto> UpdateAsync(Guid id, ActualizarComercioDto dto);
     Task DeleteAsync(Guid id);
     Task<ComercioDto> ReactivarAsync(Guid id);
+    Task<ValidarCuitResult> ValidarCuitAsync(string cuit);
 }

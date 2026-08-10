@@ -14,13 +14,23 @@ public class InteraccionService : IInteraccionService
         _repo = repo;
     }
 
-    public async Task<PagedResult<InteraccionDto>> GetByComercioAsync(Guid comercioId, int pageNumber = 1, int pageSize = 10)
+    public async Task<PagedResult<InteraccionDto>> GetByComercioAsync(
+        Guid comercioId,
+        Guid? tipoInteraccionId = null,
+        DateTime? desde = null,
+        DateTime? hasta = null,
+        int pageNumber = 1,
+        int pageSize = 10)
     {
         IOrderedQueryable<Interaccion> Ordenar(IQueryable<Interaccion> q) =>
             q.OrderByDescending(i => i.FechaInteraccion);
 
         var page = await _repo.GetFiltered(
-            (Interaccion i) => i.ComercioId == comercioId,
+            (Interaccion i) =>
+                i.ComercioId == comercioId &&
+                (!tipoInteraccionId.HasValue || i.TipoInteraccionId == tipoInteraccionId.Value) &&
+                (!desde.HasValue || i.FechaInteraccion >= desde.Value) &&
+                (!hasta.HasValue || i.FechaInteraccion <= hasta.Value),
             pageNumber,
             pageSize,
             Ordenar,
@@ -43,17 +53,19 @@ public class InteraccionService : IInteraccionService
 
     public async Task<InteraccionDto> CreateAsync(CrearInteraccionDto dto)
     {
-        var comercio = await _repo.GetById<Comercio>(dto.ComercioId)
+        var comercio = await _repo.First<Comercio>(c => c.Id == dto.ComercioId && c.Activo)
             ?? throw new NotFoundException("Comercio no encontrado.");
 
-        var tipo = await _repo.GetById<TipoInteraccion>(dto.TipoInteraccionId)
+        var tipo = await _repo.First<TipoInteraccion>(t => t.Id == dto.TipoInteraccionId && t.Activo)
             ?? throw new NotFoundException("Tipo de interacción no encontrado o inactivo.");
 
         var interaccion = new Interaccion
         {
             ComercioId = dto.ComercioId,
             TipoInteraccionId = dto.TipoInteraccionId,
-            FechaInteraccion = dto.FechaInteraccion ?? DateTime.UtcNow,
+            FechaInteraccion = dto.FechaInteraccion.HasValue
+                ? NormalizarAUtc(dto.FechaInteraccion.Value)
+                : DateTime.UtcNow,
             Notas = dto.Notas?.Trim(),
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -72,14 +84,14 @@ public class InteraccionService : IInteraccionService
 
         if (dto.TipoInteraccionId is not null && dto.TipoInteraccionId != interaccion.TipoInteraccionId)
         {
-            var tipo = await _repo.GetById<TipoInteraccion>(dto.TipoInteraccionId.Value)
+            var tipo = await _repo.First<TipoInteraccion>(t => t.Id == dto.TipoInteraccionId.Value && t.Activo)
                 ?? throw new NotFoundException("Tipo de interacción no encontrado o inactivo.");
             interaccion.TipoInteraccionId = dto.TipoInteraccionId.Value;
         }
 
         if (dto.FechaInteraccion.HasValue)
         {
-            interaccion.FechaInteraccion = dto.FechaInteraccion;
+            interaccion.FechaInteraccion = NormalizarAUtc(dto.FechaInteraccion.Value);
         }
 
         if (dto.Notas is not null) interaccion.Notas = dto.Notas.Trim();
@@ -97,6 +109,17 @@ public class InteraccionService : IInteraccionService
             ?? throw new NotFoundException("Interacción no encontrada.");
 
         await _repo.Delete(interaccion);
+    }
+
+    /// <summary>
+    /// Npgsql rechaza escribir DateTime Kind=Unspecified en columnas timestamptz.
+    /// Solo en ese caso se reasigna el Kind a UTC (sin desplazar el instante).
+    /// </summary>
+    private static DateTime NormalizarAUtc(DateTime fecha)
+    {
+        return fecha.Kind == DateTimeKind.Unspecified
+            ? DateTime.SpecifyKind(fecha, DateTimeKind.Utc)
+            : fecha;
     }
 
     private static InteraccionDto Mapear(Interaccion i)

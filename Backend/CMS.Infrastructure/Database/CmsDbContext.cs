@@ -13,6 +13,7 @@ namespace CMS.Infrastructure.Database
         public DbSet<Comercio> Comercios => Set<Comercio>();
         public DbSet<Interaccion> Interacciones => Set<Interaccion>();
         public DbSet<TipoInteraccion> TiposInteraccion => Set<TipoInteraccion>();
+        public DbSet<Usuario> Usuarios => Set<Usuario>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,7 +25,6 @@ namespace CMS.Infrastructure.Database
                 e.Property(t => t.Codigo).IsRequired().HasMaxLength(50);
                 e.Property(t => t.Descripcion).HasMaxLength(300);
                 e.HasIndex(t => t.Codigo).IsUnique();
-                e.HasQueryFilter(t => t.Activo);
                 e.HasData(Seed.TiposInteraccion);
             });
 
@@ -38,7 +38,6 @@ namespace CMS.Infrastructure.Database
                 e.Property(c => c.Email).HasMaxLength(150);
                 e.Property(c => c.Rubro).HasMaxLength(100);
                 e.Property(c => c.Notas).HasMaxLength(2000);
-                e.HasQueryFilter(c => c.Activo);
             });
 
             modelBuilder.Entity<Interaccion>(e =>
@@ -54,6 +53,17 @@ namespace CMS.Infrastructure.Database
                     .WithMany()
                     .HasForeignKey(i => i.TipoInteraccionId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<Usuario>(e =>
+            {
+                e.Property(u => u.NombreUsuario).IsRequired().HasMaxLength(50);
+                e.Property(u => u.Nombre).IsRequired().HasMaxLength(100);
+                e.Property(u => u.PasswordHash).IsRequired().HasMaxLength(100);
+                e.Property(u => u.Rol).HasConversion<string>().HasMaxLength(20);
+                e.Property(u => u.Email).HasMaxLength(150);
+                e.Property(u => u.Telefono).HasMaxLength(50);
+                e.HasIndex(u => u.NombreUsuario).IsUnique();
             });
 
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

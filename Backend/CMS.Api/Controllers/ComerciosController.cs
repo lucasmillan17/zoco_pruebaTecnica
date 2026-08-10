@@ -1,11 +1,13 @@
 using CMS.Application.Comercios;
 using CMS.Application.Oportunidad;
 using CMS.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/comercios")]
 public class ComerciosController : ControllerBase
 {
@@ -25,10 +27,11 @@ public class ComerciosController : ControllerBase
         [FromQuery] string? rubro = null,
         [FromQuery] OrdenComercio? ordenarPor = null,
         [FromQuery] OrdenDireccion? orden = null,
+        [FromQuery] EstadoActivo estadoActivo = EstadoActivo.Activos,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        var query = new BuscarComerciosQuery(busqueda, estado, rubro, ordenarPor, orden, pageNumber, pageSize);
+        var query = new BuscarComerciosQuery(busqueda, estado, rubro, ordenarPor, orden, estadoActivo, pageNumber, pageSize);
         var resultado = await _comercioService.GetAllAsync(query);
         return Ok(resultado);
     }
@@ -38,6 +41,13 @@ public class ComerciosController : ControllerBase
     {
         var resultado = await _comercioService.GetByIdAsync(id);
         return resultado is null ? NotFound() : Ok(resultado);
+    }
+
+    [HttpGet("validar-cuit")]
+    public async Task<IActionResult> ValidarCuit([FromQuery] string cuit)
+    {
+        var resultado = await _comercioService.ValidarCuitAsync(cuit);
+        return Ok(resultado);
     }
 
     [HttpPost]

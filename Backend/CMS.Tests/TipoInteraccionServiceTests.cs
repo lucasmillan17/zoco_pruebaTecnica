@@ -63,6 +63,72 @@ public class TipoInteraccionServiceTests
         Assert.False(enRepo!.Activo);
     }
 
+    [Fact]
+    public async Task Reactivar_VuelveActivarElTipo()
+    {
+        var (service, repo) = CrearService();
+        var creado = await service.CreateAsync(new CrearTipoInteraccionDto("demo", "Demo", null));
+        await service.DeleteAsync(creado.Id);
+
+        var resultado = await service.ReactivarAsync(creado.Id);
+
+        Assert.True(resultado.Activo);
+        var enRepo = await repo.GetById<TipoInteraccion>(creado.Id);
+        Assert.True(enRepo!.Activo);
+    }
+
+    [Fact]
+    public async Task GetAll_ActivosPorDefecto_NoIncluyeInactivos()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(new CrearTipoInteraccionDto("llamada", "Llamada", null));
+        var demo = await service.CreateAsync(new CrearTipoInteraccionDto("demo", "Demo", null));
+        await service.DeleteAsync(demo.Id);
+
+        var resultado = await service.GetAllAsync();
+
+        var unico = Assert.Single(resultado.Items);
+        Assert.Equal("llamada", unico.Codigo);
+    }
+
+    [Fact]
+    public async Task GetAll_Inactivos_SoloDevuelveDesactivados()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(new CrearTipoInteraccionDto("llamada", "Llamada", null));
+        var demo = await service.CreateAsync(new CrearTipoInteraccionDto("demo", "Demo", null));
+        await service.DeleteAsync(demo.Id);
+
+        var resultado = await service.GetAllAsync(EstadoActivo.Inactivos);
+
+        var unico = Assert.Single(resultado.Items);
+        Assert.Equal("demo", unico.Codigo);
+    }
+
+    [Fact]
+    public async Task GetAll_Todos_DevuelveActivosEInactivos()
+    {
+        var (service, _) = CrearService();
+        await service.CreateAsync(new CrearTipoInteraccionDto("llamada", "Llamada", null));
+        var demo = await service.CreateAsync(new CrearTipoInteraccionDto("demo", "Demo", null));
+        await service.DeleteAsync(demo.Id);
+
+        var resultado = await service.GetAllAsync(EstadoActivo.Todos);
+
+        Assert.Equal(2, resultado.Items.Count);
+    }
+
+    [Fact]
+    public async Task Crear_ConCodigoDeTipoInactivo_LanzaConflict()
+    {
+        var (service, _) = CrearService();
+        var creado = await service.CreateAsync(new CrearTipoInteraccionDto("llamada", "Llamada", null));
+        await service.DeleteAsync(creado.Id);
+
+        await Assert.ThrowsAsync<ConflictException>(
+            () => service.CreateAsync(new CrearTipoInteraccionDto("llamada", "Otra Llamada", null)));
+    }
+
     private static (TipoInteraccionService Service, InMemoryRepository Repo) CrearService()
     {
         var repo = new InMemoryRepository();

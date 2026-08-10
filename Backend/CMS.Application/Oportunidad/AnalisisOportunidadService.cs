@@ -28,6 +28,11 @@ public class AnalisisOportunidadService : IAnalisisOportunidadService
         var comercio = await _repo.GetById<Comercio>(comercioId, "Interacciones", "Interacciones.TipoInteraccion")
             ?? throw new NotFoundException("Comercio no encontrado.");
 
+        if (!comercio.Activo)
+        {
+            throw new NotFoundException("Comercio no encontrado.");
+        }
+
         var interacciones = comercio.Interacciones
             .OrderBy(i => i.FechaInteraccion)
             .Select(i => new InteraccionContexto(i.TipoInteraccion?.Nombre ?? "desconocido", i.FechaInteraccion, i.Notas))

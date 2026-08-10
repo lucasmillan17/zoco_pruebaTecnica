@@ -76,12 +76,11 @@ public class ComercioService : IComercioService
             throw new ConflictException("El CUIT no es válido (dígito verificador incorrecto).");
         }
 
-        var existente = await _repo.First<Comercio>(c => c.Cuit == dto.Cuit);
+        var existente = await _repo.First<Comercio>(c => c.Cuit == dto.Cuit && c.Activo);
         if (existente is not null)
         {
             throw new ConflictException($"Ya existe un comercio con el CUIT {dto.Cuit}.");
         }
-
         var comercio = new Comercio
         {
             RazonSocial = dto.RazonSocial.Trim(),
@@ -101,6 +100,22 @@ public class ComercioService : IComercioService
 
         await _repo.Add(comercio);
         return Mapear(comercio);
+    }
+
+    /// <summary>
+    /// Valida el checksum del CUIT y, si es válido, indica si ya existe un comercio
+    /// Activo con ese CUIT (coherente con el índice único filtrado por Activo).
+    /// </summary>
+    public async Task<ValidarCuitResult> ValidarCuitAsync(string cuit)
+    {
+        var esValido = CuitValidator.EsValido(cuit);
+        if (!esValido)
+        {
+            return new ValidarCuitResult(false, false);
+        }
+
+        var existente = await _repo.First<Comercio>(c => c.Cuit == cuit && c.Activo);
+        return new ValidarCuitResult(true, existente is not null);
     }
 
     public async Task<ComercioDto> UpdateAsync(Guid id, ActualizarComercioDto dto)
@@ -142,16 +157,16 @@ public class ComercioService : IComercioService
     }
 
     /// <summary>
-    /// Reactivación explícita: Rechazado → Nuevo. No es una transición del Update.
+    /// Reactivación de un comercio inactivo (soft delete) o rechazado: vuelve a Nuevo.
     /// </summary>
     public async Task<ComercioDto> ReactivarAsync(Guid id)
     {
         var comercio = await _repo.GetById<Comercio>(id)
             ?? throw new NotFoundException("Comercio no encontrado.");
 
-        if (comercio.Estado != EstadoComercio.Rechazado)
+        if (comercio.Activo && comercio.Estado != EstadoComercio.Rechazado)
         {
-            throw new ConflictException("Solo se puede reactivar un comercio en estado Rechazado.");
+            throw new ConflictException("El comercio ya está activo y no está en estado Rechazado.");
         }
 
         comercio.Estado = EstadoComercio.Nuevo;
@@ -176,12 +191,12 @@ public class ComercioService : IComercioService
 
         if (!string.IsNullOrWhiteSpace(query.Busqueda))
         {
-            var busqueda = query.Busqueda.Trim();
+            var busqueda = query.Busqueda.Trim().ToLower();
             filtro = Combinar(filtro, c =>
-                c.RazonSocial.Contains(busqueda) ||
-                c.Cuit.Contains(busqueda) ||
-                (c.NombreDelContacto != null && c.NombreDelContacto.Contains(busqueda)) ||
-                (c.Email != null && c.Email.Contains(busqueda)));
+                c.RazonSocial.ToLower().Contains(busqueda) ||
+                c.Cuit.ToLower().Contains(busqueda) ||
+                (c.NombreDelContacto != null && c.NombreDelContacto.ToLower().Contains(busqueda)) ||
+                (c.Email != null && c.Email.ToLower().Contains(busqueda)));
         }
 
         if (query.Estado is not null)
@@ -192,9 +207,16 @@ public class ComercioService : IComercioService
 
         if (!string.IsNullOrWhiteSpace(query.Rubro))
         {
-            var rubro = query.Rubro.Trim();
-            filtro = Combinar(filtro, c => c.Rubro != null && c.Rubro.Contains(rubro));
+            var rubro = query.Rubro.Trim().ToLower();
+            filtro = Combinar(filtro, c => c.Rubro != null && c.Rubro.ToLower().Contains(rubro));
         }
+
+        filtro = query.EstadoActivo switch
+        {
+            EstadoActivo.Inactivos => Combinar(filtro, c => !c.Activo),
+            EstadoActivo.Activos => Combinar(filtro, c => c.Activo),
+            _ => filtro
+        };
 
         return filtro;
     }
@@ -222,6 +244,7 @@ public class ComercioService : IComercioService
             c.FechaDeCreacionEmpresa,
             c.Notas,
             c.Estado,
+            c.Activo,
             c.CreatedAt,
             c.UpdatedAt);
     }

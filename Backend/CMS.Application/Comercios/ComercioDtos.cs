@@ -86,6 +86,7 @@ public record ComercioDto(
     DateTime FechaDeCreacionEmpresa,
     string? Notas,
     EstadoComercio Estado,
+    bool Activo,
     DateTime CreatedAt,
     DateTime UpdatedAt);
 
@@ -95,5 +96,8 @@ public record BuscarComerciosQuery(
     string? Rubro = null,
     OrdenComercio? OrdenarPor = null,
     OrdenDireccion? Orden = null,
+    EstadoActivo EstadoActivo = EstadoActivo.Activos,
     int PageNumber = 1,
     int PageSize = 10);
+
+public record ValidarCuitResult(bool EsValido, bool Existe);

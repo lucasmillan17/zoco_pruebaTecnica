@@ -1,9 +1,12 @@
 using CMS.Application.TiposInteraccion;
+using CMS.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/tipos-interaccion")]
 public class TiposInteraccionController : ControllerBase
 {
@@ -15,9 +18,12 @@ public class TiposInteraccionController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+    public async Task<IActionResult> GetAll(
+        [FromQuery] EstadoActivo estadoActivo = EstadoActivo.Activos,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10)
     {
-        var resultado = await _service.GetAllAsync(pageNumber, pageSize);
+        var resultado = await _service.GetAllAsync(estadoActivo, pageNumber, pageSize);
         return Ok(resultado);
     }
 
@@ -29,6 +35,7 @@ public class TiposInteraccionController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> Create([FromBody] CrearTipoInteraccionDto dto)
     {
         var resultado = await _service.CreateAsync(dto);
@@ -36,6 +43,7 @@ public class TiposInteraccionController : ControllerBase
     }
 
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> Update(Guid id, [FromBody] ActualizarTipoInteraccionDto dto)
     {
         var resultado = await _service.UpdateAsync(id, dto);
@@ -43,9 +51,18 @@ public class TiposInteraccionController : ControllerBase
     }
 
     [HttpDelete("{id:guid}")]
+    [Authorize(Roles = "Administrador")]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _service.DeleteAsync(id);
         return NoContent();
+    }
+
+    [HttpPost("{id:guid}/reactivar")]
+    [Authorize(Roles = "Administrador")]
+    public async Task<IActionResult> Reactivar(Guid id)
+    {
+        var resultado = await _service.ReactivarAsync(id);
+        return Ok(resultado);
     }
 }

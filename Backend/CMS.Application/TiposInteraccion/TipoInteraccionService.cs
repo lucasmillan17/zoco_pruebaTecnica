@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using CMS.Application.DBInterfaces;
 using CMS.Application.DBInterfaces.Wrappers;
@@ -17,9 +18,19 @@ public partial class TipoInteraccionService : ITipoInteraccionService
         _repo = repo;
     }
 
-    public async Task<PagedResult<TipoInteraccionDto>> GetAllAsync(int pageNumber = 1, int pageSize = 10)
+    public async Task<PagedResult<TipoInteraccionDto>> GetAllAsync(
+        EstadoActivo estadoActivo = EstadoActivo.Activos,
+        int pageNumber = 1,
+        int pageSize = 10)
     {
-        var page = await _repo.GetAll<TipoInteraccion>(pageNumber, pageSize);
+        Expression<Func<TipoInteraccion, bool>> filtro = estadoActivo switch
+        {
+            EstadoActivo.Inactivos => t => !t.Activo,
+            EstadoActivo.Activos => t => t.Activo,
+            _ => t => true
+        };
+
+        var page = await _repo.GetFiltered(filtro, pageNumber, pageSize);
         return new PagedResult<TipoInteraccionDto>
         {
             Items = page.Items.Select(Mapear).ToList(),
@@ -84,6 +95,21 @@ public partial class TipoInteraccionService : ITipoInteraccionService
         tipo.UpdatedAt = DateTime.UtcNow;
 
         await _repo.Update(tipo);
+    }
+
+    /// <summary>
+    /// Reactiva un tipo desactivado (Activo=true).
+    /// </summary>
+    public async Task<TipoInteraccionDto> ReactivarAsync(Guid id)
+    {
+        var tipo = await _repo.GetById<TipoInteraccion>(id)
+            ?? throw new NotFoundException("Tipo de interacción no encontrado.");
+
+        tipo.Activo = true;
+        tipo.UpdatedAt = DateTime.UtcNow;
+
+        await _repo.Update(tipo);
+        return Mapear(tipo);
     }
 
     private static string NormalizarCodigo(string codigo)

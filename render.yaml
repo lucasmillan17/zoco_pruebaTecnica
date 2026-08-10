@@ -12,7 +12,7 @@ services:
     region: oregon
     plan: free
     dockerfilePath: ./Dockerfile
-    healthCheckPath: /api/comercios
+    healthCheckPath: /api/health
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production

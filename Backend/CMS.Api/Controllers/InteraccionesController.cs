@@ -1,9 +1,11 @@
 using CMS.Application.Interacciones;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CMS.Api.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/interacciones")]
 public class InteraccionesController : ControllerBase
 {
@@ -17,10 +19,13 @@ public class InteraccionesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetByComercio(
         [FromQuery] Guid comercioId,
+        [FromQuery] Guid? tipoInteraccionId = null,
+        [FromQuery] DateTime? desde = null,
+        [FromQuery] DateTime? hasta = null,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        var resultado = await _service.GetByComercioAsync(comercioId, pageNumber, pageSize);
+        var resultado = await _service.GetByComercioAsync(comercioId, tipoInteraccionId, desde, hasta, pageNumber, pageSize);
         return Ok(resultado);
     }
 
