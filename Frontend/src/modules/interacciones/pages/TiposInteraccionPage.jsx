@@ -9,6 +9,7 @@ import Badge from '../../../shared/components/atoms/Badge';
 import { tiposInteraccionService } from '../services/tiposInteraccionService';
 import TipoInteraccionModal from '../components/TipoInteraccionModal';
 import FilterSelect from '../../../shared/components/molecules/FilterSelect';
+import { useToast } from '../../../shared/context/ToastProvider';
 
 function FilaTipo({ tipo, onEditar, onEliminar, onReactivar, inactivo = false }) {
   return (
@@ -43,6 +44,7 @@ function FilaTipo({ tipo, onEditar, onEliminar, onReactivar, inactivo = false })
 }
 
 export default function TiposInteraccionPage() {
+  const toast = useToast();
   const [tipos, setTipos] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
@@ -93,6 +95,7 @@ export default function TiposInteraccionPage() {
     try {
       await tiposInteraccionService.remove(tipo.id);
       await cargar();
+      toast.success(`Tipo "${tipo.nombre}" desactivado.`);
     } catch (e) {
       setError(e.message);
     }
@@ -103,6 +106,7 @@ export default function TiposInteraccionPage() {
     try {
       await tiposInteraccionService.reactivar(tipo.id);
       await cargar();
+      toast.success(`Tipo "${tipo.nombre}" reactivado.`);
     } catch (e) {
       setError(e.message);
     }

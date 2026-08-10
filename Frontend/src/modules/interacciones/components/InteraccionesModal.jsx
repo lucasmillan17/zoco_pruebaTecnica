@@ -9,10 +9,12 @@ import FilterSelect from '../../../shared/components/molecules/FilterSelect';
 import Pagination from '../../../shared/components/molecules/Pagination';
 import Badge from '../../../shared/components/atoms/Badge';
 import EmptyState from '../../../shared/components/atoms/EmptyState';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { useInteracciones } from '../hooks/useInteracciones';
 import { formatearFecha } from '../../../shared/utils/format';
 
 export default function InteraccionesModal({ comercio, onClose }) {
+  const toast = useToast();
   const {
     tipos,
     lista,
@@ -51,6 +53,7 @@ export default function InteraccionesModal({ comercio, onClose }) {
     const fechaIso = fechaInteraccion ? new Date(fechaInteraccion).toISOString() : null;
     try {
       await agregar(fechaIso, notas.trim() || null);
+      toast.success('Interacción registrada.');
       setNotas('');
       setFechaInteraccion('');
     } catch (err) {

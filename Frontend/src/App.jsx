@@ -7,10 +7,11 @@ import {
   Outlet,
   RouterProvider,
 } from 'react-router-dom';
-import { Building2, CircleUserRound, KeyRound, LogOut, Menu, Tags, Users, X } from 'lucide-react';
+import { Building2, CircleUserRound, History, KeyRound, LogOut, Menu, Tags, Users, X } from 'lucide-react';
 import ComerciosPage from './modules/comercios/pages/ComerciosPage';
 import TiposInteraccionPage from './modules/interacciones/pages/TiposInteraccionPage';
 import CuentasPage from './modules/cuentas/pages/CuentasPage';
+import AuditoriaPage from './modules/auditoria/pages/AuditoriaPage';
 import LoginPage from './modules/auth/pages/LoginPage';
 import CambiarPasswordPage from './modules/auth/pages/CambiarPasswordPage';
 import ProtectedRoute from './modules/auth/components/ProtectedRoute';
@@ -28,6 +29,7 @@ const NAV_GRUPOS = [
     items: [
       { to: '/tipos-interaccion', label: 'Tipos de interacción', icon: Tags },
       { to: '/cuentas', label: 'Cuentas', icon: Users },
+      { to: '/auditoria', label: 'Auditoría', icon: History },
     ],
   },
 ];
@@ -177,6 +179,7 @@ const router = createBrowserRouter([
             children: [
               { path: 'tipos-interaccion', element: <TiposInteraccionPage /> },
               { path: 'cuentas', element: <CuentasPage /> },
+              { path: 'auditoria', element: <AuditoriaPage /> },
             ],
           },
         ],

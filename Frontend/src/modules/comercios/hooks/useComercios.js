@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDebounce } from '../../../shared/hooks/useDebounce';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { comerciosService } from '../services/comerciosService';
 
 export function useComercios() {
+  const toast = useToast();
   const [busqueda, setBusqueda] = useState('');
   const [estado, setEstado] = useState('');
   const [estadoActivo, setEstadoActivo] = useState('activos');
@@ -53,6 +55,7 @@ export function useComercios() {
     try {
       await comerciosService.remove(comercio.id);
       await cargar();
+      toast.success(`"${comercio.razonSocial}" eliminado (se puede reactivar).`);
     } catch (e) {
       setError(e.message);
     } finally {
@@ -66,6 +69,7 @@ export function useComercios() {
     try {
       await comerciosService.reactivar(comercio.id);
       await cargar();
+      toast.success(`"${comercio.razonSocial}" reactivado.`);
     } catch (e) {
       setError(e.message);
     } finally {

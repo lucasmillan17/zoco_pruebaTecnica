@@ -6,6 +6,7 @@ import Input from '../../../shared/components/atoms/Input';
 import PasswordInput from '../../../shared/components/atoms/PasswordInput';
 import Select from '../../../shared/components/atoms/Select';
 import Modal from '../../../shared/components/atoms/Modal';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { authService } from '../../auth/services/authService';
 
 const ROLES = [
@@ -14,6 +15,7 @@ const ROLES = [
 ];
 
 export default function CuentaNuevaModal({ onGuardado, onClose }) {
+  const toast = useToast();
   const [form, setForm] = useState({
     nombreUsuario: '',
     nombre: '',
@@ -43,6 +45,7 @@ export default function CuentaNuevaModal({ onGuardado, onClose }) {
         telefono: form.telefono.trim() || null,
       };
       await authService.crearUsuario(datos);
+      toast.success('Cuenta creada.');
       onGuardado();
     } catch (err) {
       setError(err.message);

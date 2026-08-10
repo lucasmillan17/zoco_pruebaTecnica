@@ -4,12 +4,14 @@ import Button from '../../../shared/components/atoms/Button';
 import Alert from '../../../shared/components/atoms/Alert';
 import Input from '../../../shared/components/atoms/Input';
 import FormField from '../../../shared/components/molecules/FormField';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { tiposInteraccionService } from '../services/tiposInteraccionService';
 
 const CODIGO_REGEX = /^[a-z][a-z0-9_]*$/;
 
 export default function TipoInteraccionModal({ tipo, onGuardado, onClose }) {
   const esEdicion = Boolean(tipo);
+  const toast = useToast();
 
   const [codigo, setCodigo] = useState(tipo?.codigo ?? '');
   const [nombre, setNombre] = useState(tipo?.nombre ?? '');
@@ -49,6 +51,7 @@ export default function TipoInteraccionModal({ tipo, onGuardado, onClose }) {
           descripcion: descripcion.trim() || null,
         });
       }
+      toast.success(esEdicion ? 'Tipo de interacción actualizado.' : 'Tipo de interacción creado.');
       onGuardado();
       onClose();
     } catch (err) {

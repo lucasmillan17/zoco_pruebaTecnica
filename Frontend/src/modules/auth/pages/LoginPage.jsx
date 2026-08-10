@@ -4,10 +4,12 @@ import Alert from '../../../shared/components/atoms/Alert';
 import Button from '../../../shared/components/atoms/Button';
 import Input from '../../../shared/components/atoms/Input';
 import PasswordInput from '../../../shared/components/atoms/PasswordInput';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { useAuth } from '../context/AuthProvider';
 
 export default function LoginPage() {
   const { user, isAuthenticated, login } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,9 +29,11 @@ export default function LoginPage() {
     try {
       const usuarioLogueado = await login({ usuario, password });
       if (usuarioLogueado.debeCambiarPassword) {
+        toast.info('Primero definí tu contraseña nueva.');
         navigate('/cambiar-password', { replace: true });
         return;
       }
+      toast.success(`¡Bienvenido, ${usuarioLogueado.nombre}!`);
       const destino = location.state?.from?.pathname || '/comercios';
       navigate(destino, { replace: true });
     } catch (err) {

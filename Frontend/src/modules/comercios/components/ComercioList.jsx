@@ -8,6 +8,7 @@ import SearchInput from '../../../shared/components/molecules/SearchInput';
 import FilterSelect from '../../../shared/components/molecules/FilterSelect';
 import Pagination from '../../../shared/components/molecules/Pagination';
 import ComercioRow from '../../../shared/components/organisms/ComercioRow';
+import ComercioCard from '../../../shared/components/organisms/ComercioCard';
 import LeyendaAcciones from '../../../shared/components/organisms/LeyendaAcciones';
 
 const ORDENES = [
@@ -129,37 +130,54 @@ export default function ComercioList(props) {
 
         {items.length > 0 && (
           <>
-            <LeyendaAcciones />
-            <div className="mt-2 overflow-x-auto rounded-md border border-gray-200">
-              <table className="w-full min-w-[900px] border-collapse text-left">
-                <thead>
-                  <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
-                    <th className="px-3 py-2.5">Razón social</th>
-                    <th className="px-3 py-2.5">CUIT</th>
-                    <th className="px-3 py-2.5">Rubro</th>
-                    <th className="px-3 py-2.5">Contacto</th>
-                    <th className="px-3 py-2.5">Teléfono</th>
-                    <th className="px-3 py-2.5">Email</th>
-                    <th className="px-3 py-2.5">Creación</th>
-                    <th className="px-3 py-2.5">Estado</th>
-                    <th className="px-3 py-2.5 text-right">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {items.map((c) => (
-                    <ComercioRow
-                      key={c.id}
-                      comercio={c}
-                      accion={accion}
-                      onEditar={onEditar}
-                      onVerInteracciones={onVerInteracciones}
-                      onAnalizar={onAnalizar}
-                      onReactivar={reactivar}
-                      onEliminar={eliminar}
-                    />
-                  ))}
-                </tbody>
-              </table>
+            <div className="hidden md:block">
+              <LeyendaAcciones />
+              <div className="mt-2 overflow-x-auto rounded-md border border-gray-200">
+                <table className="w-full min-w-[900px] border-collapse text-left">
+                  <thead>
+                    <tr className="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                      <th className="px-3 py-2.5">Razón social</th>
+                      <th className="px-3 py-2.5">CUIT</th>
+                      <th className="px-3 py-2.5">Rubro</th>
+                      <th className="px-3 py-2.5">Contacto</th>
+                      <th className="px-3 py-2.5">Teléfono</th>
+                      <th className="px-3 py-2.5">Email</th>
+                      <th className="px-3 py-2.5">Creación</th>
+                      <th className="px-3 py-2.5">Estado</th>
+                      <th className="px-3 py-2.5 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((c) => (
+                      <ComercioRow
+                        key={c.id}
+                        comercio={c}
+                        accion={accion}
+                        onEditar={onEditar}
+                        onVerInteracciones={onVerInteracciones}
+                        onAnalizar={onAnalizar}
+                        onReactivar={reactivar}
+                        onEliminar={eliminar}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="space-y-3 md:hidden">
+              {items.map((c) => (
+                <ComercioCard
+                  key={c.id}
+                  comercio={c}
+                  accion={accion}
+                  onEditar={onEditar}
+                  onVerInteracciones={onVerInteracciones}
+                  onAnalizar={onAnalizar}
+                  onReactivar={reactivar}
+                  onEliminar={eliminar}
+                />
+              ))}
             </div>
           </>
         )}

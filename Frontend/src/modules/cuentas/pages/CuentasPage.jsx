@@ -6,6 +6,7 @@ import Button from '../../../shared/components/atoms/Button';
 import EmptyState from '../../../shared/components/atoms/EmptyState';
 import IconButton from '../../../shared/components/atoms/IconButton';
 import Spinner from '../../../shared/components/atoms/Spinner';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { useAuth } from '../../auth/context/AuthProvider';
 import { authService } from '../../auth/services/authService';
 import CuentaNuevaModal from '../components/CuentaNuevaModal';
@@ -20,6 +21,7 @@ function BadgeEstado({ activo }) {
 
 export default function CuentasPage() {
   const { user } = useAuth();
+  const toast = useToast();
   const [cuentas, setCuentas] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [error, setError] = useState(null);
@@ -48,6 +50,7 @@ export default function CuentasPage() {
     try {
       await authService.desactivarUsuario(cuenta.id);
       await cargar();
+      toast.success(`Cuenta "${cuenta.nombreUsuario}" desactivada.`);
     } catch (e) {
       setError(e.message);
     }

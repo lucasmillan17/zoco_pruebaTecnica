@@ -4,11 +4,13 @@ import Alert from '../../../shared/components/atoms/Alert';
 import Button from '../../../shared/components/atoms/Button';
 import Input from '../../../shared/components/atoms/Input';
 import PasswordInput from '../../../shared/components/atoms/PasswordInput';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { useAuth } from '../context/AuthProvider';
 import { authService } from '../services/authService';
 
 export default function CambiarPasswordPage() {
   const { user, actualizarUsuario, logout } = useAuth();
+  const toast = useToast();
   const navigate = useNavigate();
 
   const [passwordActual, setPasswordActual] = useState('');
@@ -32,6 +34,7 @@ export default function CambiarPasswordPage() {
     try {
       const usuario = await authService.cambiarPassword({ passwordActual, passwordNueva });
       actualizarUsuario(usuario);
+      toast.success(forzado ? 'Contraseña definida. ¡Ya podés usar el sistema!' : 'Contraseña actualizada.');
       navigate('/comercios', { replace: true });
     } catch (err) {
       setError(err.message);

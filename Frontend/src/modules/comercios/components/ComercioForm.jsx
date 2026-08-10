@@ -4,6 +4,7 @@ import Button from '../../../shared/components/atoms/Button';
 import Alert from '../../../shared/components/atoms/Alert';
 import Input from '../../../shared/components/atoms/Input';
 import FormField from '../../../shared/components/molecules/FormField';
+import { useToast } from '../../../shared/context/ToastProvider';
 import { useValidarCuit } from '../hooks/useValidarCuit';
 import { comerciosService } from '../services/comerciosService';
 
@@ -26,6 +27,7 @@ function aNull(valor) {
 
 export default function ComercioForm({ comercio, onClose, onGuardado }) {
   const esNuevo = !comercio;
+  const toast = useToast();
   const [form, setForm] = useState(
     esNuevo ? { ...VACIO } : { ...VACIO, ...pickCampos(comercio), estado: comercio.estado }
   );
@@ -57,6 +59,7 @@ export default function ComercioForm({ comercio, onClose, onGuardado }) {
         cuerpo.estado = form.estado;
         await comerciosService.update(comercio.id, cuerpo);
       }
+      toast.success(esNuevo ? 'Comercio creado.' : 'Comercio actualizado.');
       onGuardado();
     } catch (err) {
       setError(err.message);

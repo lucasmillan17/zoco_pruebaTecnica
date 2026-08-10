@@ -1,7 +1,6 @@
-import { MessagesSquare, Pencil, RotateCcw, Sparkles, Trash2 } from 'lucide-react';
 import EstadoBadge from '../molecules/EstadoBadge';
 import Badge from '../atoms/Badge';
-import IconButton from '../atoms/IconButton';
+import AccionesComercio from '../molecules/AccionesComercio';
 import { formatearFecha } from '../../utils/format';
 
 export default function ComercioRow({
@@ -13,8 +12,6 @@ export default function ComercioRow({
   onReactivar,
   onEliminar,
 }) {
-  const deshabilitado = accion === comercio.id;
-
   return (
     <tr className="border-b border-gray-200 transition-colors hover:bg-gray-50">
       <td className="px-3 py-2.5">
@@ -39,38 +36,15 @@ export default function ComercioRow({
         </div>
       </td>
       <td className="px-3 py-2.5">
-        <div className="flex items-center justify-end gap-0.5">
-          {onEditar && (
-            <IconButton titulo="Editar" onClick={() => onEditar(comercio)} disabled={deshabilitado}>
-              <Pencil className="h-4 w-4" />
-            </IconButton>
-          )}
-          {onVerInteracciones && (
-            <IconButton titulo="Interacciones" onClick={() => onVerInteracciones(comercio)} disabled={deshabilitado}>
-              <MessagesSquare className="h-4 w-4" />
-            </IconButton>
-          )}
-          {onAnalizar && (
-            <IconButton titulo="Oportunidad" onClick={() => onAnalizar(comercio)} disabled={deshabilitado}>
-              <Sparkles className="h-4 w-4" />
-            </IconButton>
-          )}
-          {onReactivar && (comercio.activo === false || comercio.estado === 'Rechazado') && (
-            <IconButton titulo="Reactivar" onClick={() => onReactivar(comercio)} disabled={deshabilitado}>
-              <RotateCcw className="h-4 w-4" />
-            </IconButton>
-          )}
-          {onEliminar && (
-            <IconButton
-              titulo="Eliminar"
-              onClick={() => onEliminar(comercio)}
-              disabled={deshabilitado}
-              className="hover:text-danger"
-            >
-              <Trash2 className="h-4 w-4" />
-            </IconButton>
-          )}
-        </div>
+        <AccionesComercio
+          comercio={comercio}
+          accion={accion}
+          onEditar={onEditar}
+          onVerInteracciones={onVerInteracciones}
+          onAnalizar={onAnalizar}
+          onReactivar={onReactivar}
+          onEliminar={onEliminar}
+        />
       </td>
     </tr>
   );
