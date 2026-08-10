@@ -63,8 +63,8 @@ export function useInteracciones(comercioId) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cargar]);
 
-  const cambiarFiltro = (setter) => (valor) => {
-    setter(valor);
+  const cambiarFiltro = (setter) => (e) => {
+    setter(e.target.value);
     setPage(1);
   };
 
