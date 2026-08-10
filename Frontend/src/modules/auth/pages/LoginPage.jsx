@@ -47,8 +47,8 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4">
       <div className="w-full max-w-sm rounded-lg border border-border bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
-          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-md bg-primary text-lg font-bold text-white">
-            C
+          <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-md bg-[#0f2a3b] text-xl font-bold text-[#c5d01a]">
+            Z
           </span>
           <h1 className="text-xl font-semibold text-text">CMS Zoco</h1>
           <p className="mt-1 text-sm text-muted">Ingresá con tu usuario y contraseña</p>
